@@ -5,10 +5,10 @@ import com.cydeo.entity.Role;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component //for DI
 public class RoleMapper {
 
-    private ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
 
     public RoleMapper(ModelMapper modelMapper) {
         this.modelMapper = modelMapper;
