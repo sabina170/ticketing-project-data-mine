@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class UserServiceImpl implements UserService {  //BREAK TILL 2:20 PM (5 MIN REVIEW)
+public class UserServiceImpl implements UserService {
     @Override
     public List<UserDTO> listAllUsers() {
         return null;
