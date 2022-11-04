@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
         //save the updated user in the DB:
         userRepository.save(convertedUser);
 
-        return findByUserName(user.getUserName());
+        return findByUserName(user.getUserName()); // return user;
 
     }
 }
