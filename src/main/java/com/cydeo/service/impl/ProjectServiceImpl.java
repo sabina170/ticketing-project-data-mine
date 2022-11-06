@@ -39,6 +39,9 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public void save(ProjectDTO dto) {
         dto.setProjectStatus(Status.OPEN);
+        //it is for project list table in ui, we should set the status before saving, because in create project form we in ui we dont have status field, but in list of project table we have status field.
+        // After saving new project it needs to be come to that project list with the OPEN status.
+        // otherwise we will get ean error "property or field "value" cannot be found on null
         Project project = projectMapper.convertToEntity(dto);
         projectRepository.save(project);
 
@@ -47,17 +50,18 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public void update(ProjectDTO dto) {
         //Spring Boot is creating primary key, since  1st set id that is coming from ui:
-        //Find current user:
+        //Find current project in DB:
         Project project = projectRepository.findByProjectCode(dto.getProjectCode());
 
-        //Map update userDto to entity object:
+        //Map update projectDto to entity object:
         Project convertedProject = projectMapper.convertToEntity(dto);
 
         //set id to the converted object:
         convertedProject.setId(project.getId());
+        //set status to the converted object:
         convertedProject.setProjectStatus(project.getProjectStatus());
 
-        //save the updated user in the DB:
+        //save the updated project in the DB:
         projectRepository.save(convertedProject);
 
     }
