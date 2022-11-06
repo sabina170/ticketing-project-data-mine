@@ -65,7 +65,7 @@ public class TaskController {
     @GetMapping("/update/{taskId}")
     public String editTask(@PathVariable("taskId") Long taskId, Model model) {
 
-        model.addAttribute("task", taskService.listAllTasks());
+        model.addAttribute("task", taskService.getById(taskId));
         model.addAttribute("projects", projectService.listAllProjects());
         model.addAttribute("employees", userService.listAllByRole("employees"));
         model.addAttribute("tasks", taskService.listAllTasks());
