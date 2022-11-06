@@ -67,7 +67,7 @@ public class TaskController {
 
         model.addAttribute("task", taskService.getById(taskId));
         model.addAttribute("projects", projectService.listAllProjects());
-        model.addAttribute("employees", userService.listAllByRole("employees"));
+        model.addAttribute("employees", userService.listAllByRole("employee"));
         model.addAttribute("tasks", taskService.listAllTasks());
 
         return "/task/update";
