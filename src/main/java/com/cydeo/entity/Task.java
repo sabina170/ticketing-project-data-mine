@@ -25,7 +25,7 @@ public class Task extends BaseEntity{
     private Project project;
 
     @ManyToOne(fetch= FetchType.LAZY)
-    @JoinColumn(name="employee_id")
+    @JoinColumn(name="assigned_employee_id") //here it is not mandatory to put name = "project_id"
     private User assignedEmployee;
 
     private String taskSubject;
