@@ -63,7 +63,7 @@ public class ProjectServiceImpl implements ProjectService {
         //Find current project in DB:
         Project project = projectRepository.findByProjectCode(dto.getProjectCode());
 
-        //Map update projectDto to entity object:
+        //Map updated projectDto to entity object:
         Project convertedProject = projectMapper.convertToEntity(dto);
 
         //set id to the converted object:
@@ -82,8 +82,16 @@ public class ProjectServiceImpl implements ProjectService {
         Project project = projectRepository.findByProjectCode(code);
         //change the isDeleted field to true:
         project.setIsDeleted(true);
+
+        //* fixing bug: unique fields should be like this, if in ui we delete object
+        project.setProjectCode(project.getProjectCode() +"-"+ project.getId()); // after deleting the project SP00 becomes SP00-1
+        //later I can use SP00 for creating another new project
+
         //save the object in the db:
         projectRepository.save(project);
+
+
+        taskService.deleteByProject(projectMapper.convertToDto(project));
 
     }
 
