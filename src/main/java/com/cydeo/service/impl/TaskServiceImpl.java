@@ -57,21 +57,20 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void update(TaskDTO dto) {
-
-            //Spring Boot is creating primary key, since  1st set id that is coming from ui:
-            //Find current project in DB:
+        
+            //Find current task in DB:
             Optional<Task> task = taskRepository.findById(dto.getId());
 
-            //Map update projectDto to entity object:
+            //Map update  taskDto to entity object:
             Task convertedTask = taskMapper.convertToEntity(dto);
 
-          //set status and assigned date to the converted object:
+          //set task status and assigned date to the converted object:
             if(task.isPresent()){
                 convertedTask.setTaskStatus(task.get().getTaskStatus());
                 convertedTask.setAssignedDate((task.get().getAssignedDate()));
             }
 
-            //save the updated project in the DB:
+            //save the updated task in the DB:
             taskRepository.save(convertedTask);
 
         }

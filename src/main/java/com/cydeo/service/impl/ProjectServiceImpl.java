@@ -100,14 +100,18 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectDTO> listAllProjectDetails() {
+        //capture the manager with the security:
         UserDTO currentUSerDTO = userService.findByUserName("harold@manager.com");
+        //convert userDto to user entity:
         User user= userMapper.convertToEntity(currentUSerDTO);
+        //go to DB find all the projects belong to that manager:
         List<Project> list =projectRepository.findAllByAssignedManager(user);
+        //Map all the projects belongs to that manager: convert each project to DTO,count unfinished and finished tasks:
         return list.stream().map(project->{
-                                    ProjectDTO obj = projectMapper.convertToDto(project);
-                                    obj.setUnfinishedTaskCounts(taskService.totalNonCompletedTask(project.getProjectCode()));
-                                    obj.setCompleteTaskCounts(taskService.totalCompletedTask(project.getProjectCode()));
-                                    return obj;
+                             ProjectDTO dto = projectMapper.convertToDto(project);
+                             dto.setUnfinishedTaskCounts(taskService.totalNonCompletedTask(project.getProjectCode()));
+                             dto.setCompleteTaskCounts(taskService.totalCompletedTask(project.getProjectCode()));
+                             return dto;
                                     
         }).collect(Collectors.toList());
 
