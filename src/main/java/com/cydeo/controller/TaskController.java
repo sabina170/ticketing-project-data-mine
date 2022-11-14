@@ -66,7 +66,7 @@ public class TaskController {
     @GetMapping("/update/{taskId}")
     public String editTask(@PathVariable("taskId") Long taskId, Model model) {
 
-        model.addAttribute("task", taskService.getById(taskId));
+        model.addAttribute("task", taskService.findById(taskId));
         model.addAttribute("projects", projectService.listAllProjects());
         model.addAttribute("employees", userService.listAllByRole("employee"));
         model.addAttribute("tasks", taskService.listAllTasks());
@@ -109,7 +109,7 @@ public class TaskController {
     @GetMapping("/employee/edit/{id}")
     public String employeeEditTask(@PathVariable Long id, Model model) {
 
-        model.addAttribute("task", taskService.getById(id));
+        model.addAttribute("task", taskService.findById(id));
         model.addAttribute("statuses", Status.values());
         model.addAttribute("tasks", taskService.listAllTasksByStatusIsNot(Status.COMPLETE));
 

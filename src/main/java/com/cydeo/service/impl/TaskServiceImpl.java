@@ -42,7 +42,7 @@ public class TaskServiceImpl implements TaskService {
 
 
     @Override
-    public TaskDTO getById(Long id) {
+    public TaskDTO findById(Long id) {
         Optional<Task> task = taskRepository.findById(id);
 
         if(task.isPresent()){
@@ -80,7 +80,8 @@ public class TaskServiceImpl implements TaskService {
 
           //set task status and assigned date to the converted object:
             if(task.isPresent()){
-                convertedTask.setTaskStatus(task.get().getTaskStatus());
+                //convertedTask.setTaskStatus(task.get().getTaskStatus());
+                convertedTask.setTaskStatus(dto.getTaskStatus() == null ? task.get().getTaskStatus() : dto.getTaskStatus());
                 convertedTask.setAssignedDate((task.get().getAssignedDate()));
                 //save the updated task in the DB:
                 taskRepository.save(convertedTask);
