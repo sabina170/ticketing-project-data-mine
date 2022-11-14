@@ -35,13 +35,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDTO> listAllUsers() {
-        return userRepository.findAll(Sort.by("firstName")).stream()
-                    .map(user->userMapper.convertToDto(user)).collect(Collectors.toList());
+//        return userRepository.findAll(Sort.by("firstName")).stream()
+//                    .map(user->userMapper.convertToDto(user)).collect(Collectors.toList());
+
+        List<User> userList = userRepository.findAllByIsDeletedOrderByFirstNameDesc(false);
+        return userList.stream().map(userMapper::convertToDto).collect(Collectors.toList());
     }
 
     @Override
     public UserDTO findByUserName(String username) {
-        return userMapper.convertToDto(userRepository.findByUserName(username));
+       // return userMapper.convertToDto(userRepository.findByUserName(username));
+        return userMapper.convertToDto(userRepository.findByUserNameAndIsDeleted(username, false));
     }
 
     @Override
@@ -50,20 +54,16 @@ public class UserServiceImpl implements UserService {
 
     }
 
-    @Override
-    public void deleteByUserName(String username) {
-
-        userRepository.deleteByUserName(username);
-    }
 
     @Override
     public UserDTO update(UserDTO user) {
         //Spring Boot is creating primary key, since  1st set id that is coming from ui:
         //Find current user:
-        User user1 = userRepository.findByUserName(user.getUserName());
+       // User user1 = userRepository.findByUserName(user.getUserName());
+        User user1 = userRepository.findByUserNameAndIsDeleted(user.getUserName(), false);  //has id
 
         //Map update userDto to entity object:
-        User convertedUser = userMapper.convertToEntity(user);
+        User convertedUser = userMapper.convertToEntity(user); // has id?
 
         //set id to the converted object:
         convertedUser.setId(user1.getId());
@@ -75,14 +75,22 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    //    @Override
+//    public void deleteByUserName(String username) {
+//
+//        userRepository.deleteByUserName(username);
+//    }
+
     @Override
     public void delete(String username) {
         //go to DB and get that user with userName:
-        User user = userRepository.findByUserName(username);
+//        User user = userRepository.findByUserName(username);
+        User user = userRepository.findByUserNameAndIsDeleted(username, false);
         //check if the user cannot be deleted:
         if(checkIfUserCanBeDeleted(user)) {
             //change the isDeleted field to true:
             user.setIsDeleted(true);
+            user.setUserName(user.getUserName() + "-" + user.getId());  // harold@manager.com-2
             //save the object in the db:
             userRepository.save(user);
         }
@@ -90,7 +98,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDTO> listAllByRole(String role) {
-        return userRepository.findByRoleDescriptionIgnoreCase(role).stream()
+       // return userRepository.findByRoleDescriptionIgnoreCase(role).stream()
+        return userRepository.findByRoleDescriptionIgnoreCaseAndIsDeleted(role, false).stream()
                 .map(user-> userMapper.convertToDto(user))
                 .collect(Collectors.toList());
     }

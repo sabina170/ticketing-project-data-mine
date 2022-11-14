@@ -82,11 +82,9 @@ public class TaskServiceImpl implements TaskService {
             if(task.isPresent()){
                 convertedTask.setTaskStatus(task.get().getTaskStatus());
                 convertedTask.setAssignedDate((task.get().getAssignedDate()));
+                //save the updated task in the DB:
+                taskRepository.save(convertedTask);
             }
-
-            //save the updated task in the DB:
-            taskRepository.save(convertedTask);
-
         }
 
 
@@ -117,13 +115,23 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void deleteByProject(ProjectDTO projectDto) {
-        //**fixing bug:
+
         //convert dto to entity:
         Project project = projectMapper.convertToEntity(projectDto);
         //base on that project find all the tasks belong to that project:
         List<Task> tasks = taskRepository.findAllByProject(project);
         //......
         tasks.forEach(task -> delete(task.getId()));
+    }
+
+    @Override
+    public void completeByProject(ProjectDTO projectDTO) {
+        Project project = projectMapper.convertToEntity(projectDTO);
+        List<Task> tasks = taskRepository.findAllByProject(project);
+        tasks.stream().map(taskMapper::convertToDto).forEach(taskDTO -> {
+            taskDTO.setTaskStatus(Status.COMPLETE);
+            update(taskDTO);
+        });
     }
 
     @Override
