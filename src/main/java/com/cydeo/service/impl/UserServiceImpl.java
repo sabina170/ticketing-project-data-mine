@@ -1,15 +1,19 @@
 package com.cydeo.service.impl;
 
+import com.cydeo.dto.ProjectDTO;
+import com.cydeo.dto.TaskDTO;
 import com.cydeo.dto.UserDTO;
 import com.cydeo.entity.User;
 import com.cydeo.mapper.UserMapper;
 import com.cydeo.repository.UserRepository;
+import com.cydeo.service.ProjectService;
+import com.cydeo.service.TaskService;
 import com.cydeo.service.UserService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 
-import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,11 +23,14 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final ProjectService projectService;
+    private final TaskService taskService;
 
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, @Lazy ProjectService projectService, @Lazy TaskService taskService) {
         this.userRepository = userRepository;
-
         this.userMapper = userMapper;
+        this.projectService = projectService;
+        this.taskService = taskService;
     }
 
     @Override
@@ -72,11 +79,13 @@ public class UserServiceImpl implements UserService {
     public void delete(String username) {
         //go to DB and get that user with userName:
         User user = userRepository.findByUserName(username);
-        //change the isDeleted field to true:
-        user.setIsDeleted(true);
-        //save the object in the db:
-        userRepository.save(user);
-
+        //check if the user cannot be deleted:
+        if(checkIfUserCanBeDeleted(user)) {
+            //change the isDeleted field to true:
+            user.setIsDeleted(true);
+            //save the object in the db:
+            userRepository.save(user);
+        }
     }
 
     @Override
@@ -84,5 +93,22 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByRoleDescriptionIgnoreCase(role).stream()
                 .map(user-> userMapper.convertToDto(user))
                 .collect(Collectors.toList());
+    }
+
+
+    //**fixing bug: we create this method, that we use before delete() method
+    private boolean checkIfUserCanBeDeleted(User user) {
+        //go to DB and check if the user is manager or employee:
+        switch(user.getRole().getDescription()){
+            case "Manager":
+                List<ProjectDTO> projectDTOList = projectService.listAllNonCompletedByAssignedManager(userMapper.convertToDto(user));
+                return projectDTOList.size() == 0;
+            case "Employee":
+                List<TaskDTO> taskDTOList = taskService.listAllNonCompletedByAssignedEmployee(userMapper.convertToDto(user));
+                return taskDTOList.size() == 0;
+            default:
+                return true;
+        }
+
     }
 }

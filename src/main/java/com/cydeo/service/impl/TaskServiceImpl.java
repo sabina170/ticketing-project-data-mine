@@ -117,10 +117,13 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void deleteByProject(ProjectDTO projectDto) {
-        //**fixing bug:convert dto to entity:
+        //**fixing bug:
+        //convert dto to entity:
         Project project = projectMapper.convertToEntity(projectDto);
+        //base on that project find all the tasks belong to that project:
         List<Task> tasks = taskRepository.findAllByProject(project);
-        tasks.forEach(task-> delete(task.getId()));
+        //......
+        tasks.forEach(task -> delete(task.getId()));
     }
 
     @Override
@@ -145,5 +148,13 @@ public class TaskServiceImpl implements TaskService {
         List<Task> tasks =taskRepository.findAllByTaskStatusAndAssignedEmployee(status, user);
         //Map all the tasks belongs to that employee: convert each task to DTO:
         return tasks.stream().map(task-> taskMapper.convertToDto(task)).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TaskDTO> listAllNonCompletedByAssignedEmployee(UserDTO assignedEmployeeDto) {
+        List<Task> tasks = taskRepository.findAllByTaskStatusIsNotAndAssignedEmployee(Status.COMPLETE, userMapper.convertToEntity(assignedEmployeeDto));
+
+        return tasks.stream()
+                .map(task-> taskMapper.convertToDto(task)).collect(Collectors.toList());
     }
 }
