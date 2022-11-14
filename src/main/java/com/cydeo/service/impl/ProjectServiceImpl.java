@@ -11,6 +11,7 @@ import com.cydeo.repository.ProjectRepository;
 import com.cydeo.service.ProjectService;
 import com.cydeo.service.TaskService;
 import com.cydeo.service.UserService;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,22 +36,23 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectDTO getByProjectCode(String code) {
-        return projectMapper.convertToDto(projectRepository.findByProjectCode(code));
+        Project project = projectRepository.findByProjectCode(code);
+        return projectMapper.convertToDto(project);
     }
 
     @Override
     public List<ProjectDTO> listAllProjects() {
 
-        return projectRepository.findAll().stream()
-                .map(project->projectMapper.convertToDto(project))
-                .collect(Collectors.toList());
+        List<Project> list = projectRepository.findAll(Sort.by("projectCode"));
+
+        return list.stream().map(projectMapper::convertToDto).collect(Collectors.toList());
     }
 
     @Override
     public void save(ProjectDTO dto) {
         dto.setProjectStatus(Status.OPEN);
         //it is for project list table in ui, we should set the status before saving, because in create project form we in ui we dont have status field, but in list of project table we have status field.
-        // After saving new project it needs to be come to that project list with the OPEN status.
+        // After saving new project it needs to come to that project list with the OPEN status.
         // otherwise we will get ean error "property or field "value" cannot be found on null
         Project project = projectMapper.convertToEntity(dto);
         projectRepository.save(project);
@@ -83,7 +85,7 @@ public class ProjectServiceImpl implements ProjectService {
         //change the isDeleted field to true:
         project.setIsDeleted(true);
 
-        //* fixing bug: unique fields should be like this, if in ui we delete object
+        //unique fields should be like this, if in ui we delete the object
         project.setProjectCode(project.getProjectCode() +"-"+ project.getId()); // after deleting the project SP00 becomes SP00-1
         //later I can use SP00 for creating another new project
 
@@ -103,6 +105,8 @@ public class ProjectServiceImpl implements ProjectService {
         project.setProjectStatus(Status.COMPLETE);
         //save the object in the db:
         projectRepository.save(project);
+
+        taskService.completeByProject(projectMapper.convertToDto(project));
 
     }
 
